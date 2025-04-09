@@ -3,9 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:weather_app/theme_manager.dart';
+import 'package:clima/theme_manager.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+
+const Color primaryTextColor = Color(0xFF212121); // Dark gray
+const Color secondaryTextColor = Color(0xFF757575); // Medium gray
+const Color cardBackgroundColor = Colors.white;
+const Color backgroundColor = Color(0xFFF5F5F5); // Light gray
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({Key? key}) : super(key: key);
@@ -92,7 +97,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
       errorMessage = '';
     });
 
-    final apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
+    final apiKey = '811bbee77b5b81339fda22e8d6f7f1ad';
     final apiUrl = '$baseUrl&appid=$apiKey&units=metric';
 
     try {
@@ -173,30 +178,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Clima',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(themeManager.isDarkMode ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () {
-              themeManager.toggleTheme();
-            },
-          ),
-        ],
-      ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-            ],
-          ),
+          color: backgroundColor, // Subtle background color
+          borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(40)), // Rounded bottom corners
         ),
         child: SafeArea(
           child: Padding(
@@ -204,16 +190,41 @@ class _WeatherScreenState extends State<WeatherScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 32.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Today's Weather",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          themeManager.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                          color: primaryTextColor,
+                        ),
+                        onPressed: () {
+                          themeManager.toggleTheme();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Enter city name',
+                    hintStyle: TextStyle(color: primaryTextColor.withOpacity(0.7)),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.7),
+                    fillColor: cardBackgroundColor.withOpacity(0.7),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: Icon(Icons.search, color: primaryTextColor),
                   ),
                   onSubmitted: (value) {
                     setState(() {
@@ -233,95 +244,101 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     ),
                   )
                 else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        cityName,
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        condition,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        weatherIcon,
-                        style: const TextStyle(
-                          fontSize: 60,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        '$temperature°C',
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Feels like: $feelsLike°C',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Sunrise: $sunriseTime, Sunset: $sunsetTime',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildWeatherDetail(
-                              'Wind Speed', '$windSpeed m/s', Icons.air),
-                          _buildWeatherDetail(
-                              'Humidity', '$humidity%', Icons.water_drop),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Hourly Forecast',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child:
-                            _buildHourlyForecastCard('10 AM', '🌤️ 28°C'),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center, // Keep this
+                            children: [
+                              Text(
+                                cityName,
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                condition,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                weatherIcon,
+                                style: const TextStyle(
+                                  fontSize: 60,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                '$temperature°C',
+                                style: const TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Feels like: $feelsLike°C',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Sunrise: $sunriseTime, Sunset: $sunsetTime',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: secondaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildWeatherDetail(
+                                      'Wind Speed', '$windSpeed m/s', Icons.air),
+                                  _buildWeatherDetail(
+                                      'Humidity', '$humidity%', Icons.water_drop),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Hourly Forecast',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryTextColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: _buildHourlyForecastCard('10 AM', '🌤️ 28°C'),
+                                  ),
+                                  Expanded(
+                                    child: _buildHourlyForecastCard('1 PM', '🌞 30°C'),
+                                  ),
+                                  Expanded(
+                                    child: _buildHourlyForecastCard('4 PM', '🌥️ 26°C'),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          Expanded(
-                            child:
-                            _buildHourlyForecastCard('1 PM', '🌞 30°C'),
-                          ),
-                          Expanded(
-                            child:
-                            _buildHourlyForecastCard('4 PM', '🌥️ 26°C'),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -337,7 +354,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         Icon(
           icon,
           size: 32,
-          color: Colors.white,
+          color: primaryTextColor,
         ),
         const SizedBox(height: 5),
         Text(
@@ -345,14 +362,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: primaryTextColor,
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.white,
+            color: secondaryTextColor,
           ),
         ),
       ],
@@ -361,10 +378,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Widget _buildHourlyForecastCard(String time, String forecast) {
     return Card(
-      elevation: 4,
+      elevation: 2,
+      color: cardBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
             Text(
@@ -376,7 +397,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             ),
             Text(
               forecast,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14),
             ),
           ],
         ),
